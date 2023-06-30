@@ -17,8 +17,14 @@ const remove = joi.object({
     password:joi.string().required()
 });
 
+const password_change = joi.object({
+    old_password: joi.string().required(),
+    new_password: joi.string().required()
+});
+
 module.exports = {
     sign_up,
     login,
-    remove
+    remove,
+    password_change
 }

@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const sch_license_key = mongoose.Schema({
-    uid : {
+    license_key : {
         type: String,
         required: true,
         unique : true

@@ -32,13 +32,14 @@ router.post('/signup', async (req, res)=>{
         }
         const password = req_body.password;
         const pass_check = pass_valid.validate(password);
-
+        
+        //username, Email, password checks
         if(pass_check.code !== 200){
             const {code, message} = pass_check;
             return res.status(code).json({message});
         }
+
         //check user in DB
-        //username, Email, password checks
         const email = req_body.email;
         const existing_user = await dm_user.findOne({email});
 
@@ -203,7 +204,7 @@ router.post('/remove', async (req, res)=>{
     }
 });
 
-router.get('/accesstoken', async (req, res)=>{
+router.get('/access_token', async (req, res)=>{
     try{
         const refresh_token = req.cookies?.refresh_token;
         const ref_check = await user_auth.verify_refresh_token(refresh_token);
@@ -221,6 +222,60 @@ router.get('/accesstoken', async (req, res)=>{
         return res.status(500).json({message: err});
     }
 });
+router.patch('/password', async (req, res)=>{
+    try{
+        const access_token = req.header('x-auth-token');
+        const acc_check = user_auth.verify_access_token(access_token);
+        
+        if(acc_check.code !== 200){
+            const {code, message} = acc_check;
+            return res.status(code).json({message});
+        }   
+        
+        const user_id = acc_check.message;
 
+        const joi_check = user_joi.password_change.validate(req.body);
+        
+        if(joi_check.error){
+            return res.status(400).json({message: joi_check.error.details});
+        }
+
+        const req_body = req.body;
+        const {old_password, new_password} = req_body;
+
+        const old_pass_check = pass_valid.sch_password.validate(old_password);
+        if(!old_pass_check){
+            return res.status(401).json({message: "Old Password is Invalid"});
+        }
+
+        const new_pass_check = pass_valid.validate(new_password);
+        if(new_pass_check.code !== 200){
+            const {code, message} = new_pass_check;
+            return res.status(code).json({message});
+        }
+
+        const user = await dm_user.findById({_id: user_id});
+        
+        if(!user){
+            return res.status(404).json({message: "user not found"});
+        }
+        const hashed_old_password = user.password;
+
+        const pass_check = await bcrypt.compare(old_password, hashed_old_password);
+        
+        if(!pass_check){
+            return res.status(401).json({message: "Old Password is Invalid"});
+        }
+
+        const hashed_new_password = await bcrypt.hash(new_password, 10);
+        user.password = hashed_new_password;
+        await user.save();
+        
+        return res.status(200).json({message: "Password changed successfully"});
+        
+    }catch(err){
+        return res.status(500).json({message: err});
+    }
+});
 
 module.exports = router;

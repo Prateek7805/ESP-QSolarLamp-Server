@@ -15,7 +15,7 @@ if __name__ == "__main__":
     DB_NAME = env_vars.get('DB_NAME')
     client = MongoClient(DB_URL)
     db = client[DB_NAME]
-    collection = db["uid_maps"]
+    collection = db["license_keys"]
 
     # Generate a random license key and check if unique
     license_key = ""
@@ -27,7 +27,7 @@ if __name__ == "__main__":
         if result is None:
             break
     # Store the license key in MongoDB
-    data = {"uid": license_key, "type" : typ, "valid" : True}
+    data = {"license_key": license_key,"device_id": "", "type" : typ, "valid" : True}
     result = collection.insert_one(data)
     print(f"License key : {license_key}") 
     print("License key stored with document ID:", result.inserted_id)
