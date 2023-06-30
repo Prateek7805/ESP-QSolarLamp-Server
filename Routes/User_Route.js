@@ -167,6 +167,10 @@ router.post('/remove', async (req, res)=>{
             return res.status(400).json({message: joi_check.error.details});
         }
         const password = req_body.password;
+        const pass_rule_check = pass_valid.sch_password.validate(password);
+        if(!pass_rule_check){
+            return res.status(401).json({message: 'Invalid Password'});
+        }
         const user_id = acc_check.message;
         const user = await dm_user.findById({_id: user_id});
 
@@ -175,9 +179,9 @@ router.post('/remove', async (req, res)=>{
         }
 
         const hashed_password = user.password;
-        const password_check = await bcrypt.compare(password, hashed_password);
+        const pass_check = await bcrypt.compare(password, hashed_password);
 
-        if(!password_check){
+        if(!pass_check){
             return res.status(401).json({message: `Invalid Email or password`});
         }
 
