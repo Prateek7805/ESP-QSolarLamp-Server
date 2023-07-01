@@ -46,14 +46,14 @@ router.post('/register', async (req, res)=>{
             return res.status(code).json({message});
         }
         
-        const license_key_check = license_key_valid.validate(license_key);
+        const license_key_check = await license_key_valid.validate(license_key);
         if(license_key_check.code !== 200){
             const {code, message} = license_key_check;
             return res.status(code).json({message});
         }
         
         
-        
+
     }catch(err){
         return res.status(500).json({message: err});
     }
