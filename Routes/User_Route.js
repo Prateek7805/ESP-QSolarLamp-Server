@@ -222,6 +222,7 @@ router.get('/access_token', async (req, res)=>{
         return res.status(500).json({message: err});
     }
 });
+
 router.patch('/password', async (req, res)=>{
     try{
         const access_token = req.header('x-auth-token');
