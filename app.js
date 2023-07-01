@@ -1,3 +1,4 @@
+require('dotenv').config();
 require('./DBO/Connection/DB_Connection');
 const express = require('express');
 const cookie_parser = require('cookie-parser');
