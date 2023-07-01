@@ -15,7 +15,7 @@ const dm_license_key = require('../DBO/License_Key_Sch');
 
 router.use(body_parser.json());
 router.use(cookie_parser());
-const dev_mode = process.env.DEV;
+const dev_mode = process.env.DEV === 'true';
 
 const cookie_options = {
     httpOnly: true,
