@@ -44,7 +44,7 @@ router.post('/signup', async (req, res)=>{
         const existing_user = await dm_user.findOne({email});
 
         if(existing_user){
-            return res.status(409).json(`message : user with Email : ${email} exists`);
+            return res.status(409).json({message : `user with Email : ${email} exists`});
         }
         //user does not exist
         

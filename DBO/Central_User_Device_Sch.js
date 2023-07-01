@@ -29,7 +29,11 @@ const sch_user = mongoose.Schema({
             brightness : Number,
             data : [String]
         }
-    }]
+    }],
+    creation_date: {
+        type: Date,
+        default: Date.now
+    }
 });
 
 const dm_user = mongoose.model('users', sch_user);
