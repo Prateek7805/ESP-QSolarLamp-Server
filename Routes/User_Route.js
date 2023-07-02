@@ -3,6 +3,7 @@ const router = express.Router();
 const body_parser = require('body-parser');
 const cookie_parser = require('cookie-parser');
 const pass_valid = require('../Validation/Password');
+const { uuid }  = require('uuidv4');
 
 //bcrypt
 const bcrypt = require('bcrypt');
@@ -50,14 +51,20 @@ router.post('/signup', async (req, res)=>{
         
         const hashed_password = await bcrypt.hash(password, 10);
 
+        const user_uuid = await uuid();
+
         //create a user in DB
         const user = new dm_user({
             ...req_body,
-            password : hashed_password
+            password : hashed_password,
+            verification_uuid : user_uuid
         });
 
         await user.save();
 
+        // Send an verification mail to user email address.
+        // Create a uuidv4 and save in a variable, save the uuid in user collection.
+        // Email contains link like http://localhost:8000/verify_user?id={uuidv4}.
         const access_token = user_auth.get_access_token(user._id);
         const refresh_token = user_auth.get_refresh_token(user._id);
 
@@ -108,6 +115,12 @@ router.post('/login', async (req, res)=>{
             return res.status(401).json({message: `Invalid Email or password`});
         }
 
+        if(!user.verified){
+            return res.status(401).json({message: 'Please click on the verification link in the confirmation email sent to your mail box.'})
+        }
+
+        // API required for re-sending verification email.
+        // create uuid in variable, save uuid in user, send email containing the uuid verification link.
         const access_token = user_auth.get_access_token(user._id);
         const refresh_token = user_auth.get_refresh_token(user._id);
 

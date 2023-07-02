@@ -7,6 +7,11 @@ const sch_user = mongoose.Schema({
         unique : true
     },
     password : String,
+    verified: {
+        type: Boolean,
+        default: false
+    },
+    verification_uuid: String,
     date_of_birth : String,
     refresh_tokens : [{
         token : {
