@@ -10,7 +10,7 @@ async function validate(lkey){
         if(!lkey_check) return {code: 404, message : "license key integrity error"};
         if(!lkey_check.valid) return {code: 403, message : "license key validity error"};
         if(lkey_check.device_id) return {code: 409, message: "license key already registered to a user"};
-        return {code : 200, message: lkey_check.type};
+        return {code : 200, message: lkey_check};
     }catch(err){
         return {code : 500, message: err};
     }
