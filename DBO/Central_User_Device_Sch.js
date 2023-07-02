@@ -26,8 +26,15 @@ const sch_user = mongoose.Schema({
                 type: Boolean,
                 default: true
             },
-            brightness : Number,
+            brightness : {
+                type: Number,
+                default: 30
+            },
             data : [String]
+        },
+        creation_date: {
+            type: Date,
+            default: Date.now
         }
     }],
     creation_date: {
