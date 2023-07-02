@@ -12,6 +12,7 @@ async function validate(lkey){
         if(lkey_check.device_id) return {code: 409, message: "license key already registered to a user"};
         return {code : 200, message: lkey_check};
     }catch(err){
+        console.log(err);
         return {code : 500, message: err};
     }
 }
