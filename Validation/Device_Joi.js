@@ -15,10 +15,20 @@ const update = joi.object({
     data: joi.array().items(joi.string()).optional()
 });
 
+const update_name = joi.object({
+    old_name : joi.string().required(),
+    new_name : joi.string().required()
+});
 
+const update_password = joi.object({
+    name : joi.string().required(),
+    password : joi.string().required()
+});
 
 module.exports = {
     register, 
     update,
-    unregister
+    unregister,
+    update_name,
+    update_password
 }

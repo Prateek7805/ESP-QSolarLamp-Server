@@ -281,4 +281,104 @@ router.get('/statuses', async (req, res)=>{
         return res.status(500).json({message: err});
     }
 });
+router.patch('/name', async (req, res)=>{
+    try{
+        const access_token = req.header('x-auth-token');
+        const acc_check = user_auth.verify_access_token(access_token);
+        if(acc_check.code !== 200){
+            const {code, message} = acc_check;
+            return res.status(code).json({message});
+        }
+        const user_id = acc_check.message;
+        const req_body = req.body;
+        const joi_check =device_joi.update_name.validate(req_body);
+        if(joi_check.error){
+            return res.status(400).json({message: joi_check.error.details});
+        } 
+        const {old_name, new_name} = req_body;
+        const old_name_check = device_name_valid.sch_device_name.validate(old_name);
+        if(!old_name_check){
+            return res.status(400).json('Invalid device name');
+        }
+        const new_name_check = device_name_valid.validate(new_name);
+        if(new_name_check.code !== 200){
+            const {code, message} = new_name_check;
+            return res.status(code).json({message});
+        }
+        const user = await dm_user.findById({_id: user_id});
+        if(!user){
+            return res.status(404).json({message: 'User not found'});
+        }
+
+        const device_index = user.devices.findIndex(device=>{device.name === old_name});
+        
+        if(device_index === -1){
+            return res.status(404).json({message: `Device with name : ${old_name} not found`});
+        }
+
+        //update the device name
+
+        user.devices[device_index].name = new_name;
+
+        await user.save();
+
+        return res.status(200).json({message: 'Device name changed successfully'});
+
+    }catch(err){
+        console.log(err);
+        return res.status(500).json({message: err});
+    }
+});
+router.patch('/password', async (req, res)=>{
+    try{
+        const access_token = req.header('x-auth-token');
+        const acc_check = user_auth.verify_access_token(access_token);
+        if(acc_check.code !== 200){
+            const {code, message} = acc_check;
+            return res.status(code).json({message});
+        }
+
+        const user_id = acc_check.message;
+        const req_body = req.body;
+        const joi_check = device_joi.update_password(req_body);
+        if(joi_check.error){
+            return res.status(400).json({message: joi_check.error.details});
+        }
+        const {name, password} = req_body;
+        const name_check = device_name_valid.sch_device_name.validate(name);
+        
+        if(!name_check){
+            return res.status(400).json('Invalid device name');
+        }
+
+        const pass_check = pass_valid.validate(password);
+        if(pass_check.code !== 200){
+            const {code, message} = pass_check;
+            return res.status(code).json({message});
+        }
+
+        const user = await dm_user.findById({_id: user_id});
+
+        if(!user){
+            return res.status(404).json({message: 'user not found'});
+        }
+
+        const device_index = user.devices.findIndex(device=>device.name === name);
+
+        if(device_index === -1){
+            return res.status(404).json({message: `Device with name : ${name} not found`});
+        }
+        
+        const hashed_password = await bcrypt.hash(password, 10);
+
+        user.devices[device_index].password = hashed_password;
+        await user.save();
+
+        return res.status(200).json({message: 'Device password changed successfully'});
+        
+    }catch(err){
+        console.log(err);
+        return res.status(500).json({message: err});
+    }
+});
 module.exports = router;
