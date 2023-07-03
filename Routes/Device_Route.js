@@ -264,18 +264,20 @@ router.get('/statuses', async (req, res)=>{
             return res.status(code).json({message});
         }
         const user_id = acc_check.message;
-        const user = dm_user.findById({_id: user_id});
+        const user = await dm_user.findById({_id: user_id});
         if(!user){
             return res.status(404).json({message: 'User not found'});
         }
         const devices_db = user.devices;
-        if(!devices_db && devices.length === 0 ){
+        console.log(devices_db);
+        if(!devices_db){
             return res.status(404).json({message: 'No registered found'});
         }
 
-        const devices = devices_db.filter(device => {return {name: device.name, power: device.status.power, brightness: device.status.brightness, data: device.status.data}});
+        const devices = devices_db.map(device => {return {name: device.name, power: device.status.power, brightness: device.status.brightness, data: device.status.data}});
         res.status(200).json({devices});
     }catch(err){
+        console.log(err);
         return res.status(500).json({message: err});
     }
 });
