@@ -12,6 +12,7 @@ const dm_user = require('../DBO/Central_User_Device_Sch');
 const user_joi = require('../Validation/User_Joi');
 const user_auth = require('../Authentication/User_Auth');
 const dm_license_key = require('../DBO/License_Key_Sch');
+const user_management = require('../BusinessLogic/User_Management');
 
 
 router.use(body_parser.json());
@@ -77,7 +78,10 @@ router.post('/signup', async (req, res)=>{
 
         res.cookie('refresh_token', refresh_token,cookie_options);
 
-        return res.status(200).json({access_token});
+        // Send an verification mail to user email address.
+        await user_management.send_verification_email(user.email, user.uuid);
+
+        return res.status(200).json({message: 'User created, please click the link in the verification Email sent to ' + user.email});
     }catch(err){
         console.log(err);
         return res.status(500).json({message: err});
