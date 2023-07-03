@@ -10,6 +10,7 @@ const device_joi = require('../Validation/Device_Joi');
 const device_name_valid = require('../Validation/Device_Name');
 const pass_valid = require('../Validation/Password');
 const license_key_valid = require('../Validation/License_key');
+const dm_license_key = require('../DBO/License_Key_Sch');
 
 router.use(body_parser.json());
 router.use(cookie_parser());
@@ -85,9 +86,197 @@ router.post('/register', async (req, res)=>{
         return res.status(200).json({message: 'Device successfully registered'});
 
     }catch(err){
+        console.log(err);
         return res.status(500).json({message: err});
     }
 });
+router.post('/unregister', async (req, res)=>{
+    try{
+        // If device unregistered then just clear LittleFS user info from device and creds (reset)
+        const access_token = req.header('x-auth-token');
+        const acc_check = user_auth.verify_access_token(access_token);
+        if(acc_check.code !== 200){
+            const {code, message} = acc_check;
+            return res.status(code).json({message});
+        }
+        const user_id = acc_check.message;
+        const req_body = req.body;
+        const joi_check = device_joi.unregister.validate(req_body);
 
+        if(joi_check.error){
+            return res.status(400).json({message: joi_check.error.details});
+        }
 
+        const {name} = req_body;
+
+        const device_name_check = device_name_valid.sch_device_name.validate(name);
+        if(!device_name_check){
+            return res.status(400).json({message: 'Device name is invalid'});
+        }
+
+        const user = await dm_user.findById({_id: user_id});
+        if(!user){
+            return res.status(404).json({message : "User not found"});
+        }
+        const device_index = user.devices.findIndex(device=>device.name === name);
+        if(device_index === -1){
+            return res.status(404).json({message: `Device with name : ${name} does not exist`});
+        }
+        const device_id = user.devices[device_index]._id;
+
+        user.devices = user.devices.filter(device=>device.name !== name);
+        await user.save();
+        
+        const license_key_db = await dm_license_key.findOne({device_id});
+
+        if(!license_key_db){
+            return res.status(404).json({message: 'license key registered to the device not found'});
+        }
+
+        license_key_db.device_id = "";
+        await license_key_db.save();
+
+        return res.status(200).json({message: 'Device removed'});
+    }catch(err){
+        console.log(err);
+        return res.status(500).json({message: err});
+    }
+});
+router.get('/devices', async (req, res)=>{
+    try{
+        const access_token = req.header('x-auth-token');
+        const acc_check = user_auth.verify_access_token(access_token);
+        if(acc_check.code !== 200){
+            const {code, message} = acc_check;
+            return res.status(code).json({message});
+        }
+
+        const user_id = acc_check.message;
+        const user = await dm_user.findById({_id: user_id});
+
+        if(!user){
+            return res.status(404).json({message: 'User not found'});
+        }
+        
+        
+        const devices = user.devices.map(device=>{return {name: device.name}});
+        return res.status(200).json({devices});
+
+    }catch(err){
+        return res.status(500).json({message: err});
+    }
+});
+router.patch('/status', async (req, res)=>{
+    try{
+        const access_token = req.header('x-auth-token');
+        const acc_check = user_auth.verify_access_token(access_token);
+        if(acc_check.code !== 200){
+            const {code, message} = acc_check;
+            return res.status(code).json({message});
+        }
+        const user_id = acc_check.message;
+        const has_name = req.query.hasOwnProperty('name');
+        if(!has_name){
+            return res.status(400).json({message: "Paarmeter : 'name' is required"});
+        }
+        const name = req.query.name;
+
+        const req_body = req.body;
+        const joi_check = device_joi.update.validate(req_body);
+
+        if(joi_check.error){
+            return res.status(400).json({message: joi_check.error.details});
+        }
+        
+        const {power, brightness, data} = req_body;
+        const device_name_check = device_name_valid.sch_device_name.validate(name);
+
+        if(!device_name_check){
+            return res.status(400).json({message: 'Invalid device name'});
+        }
+
+        const user = await dm_user.findById({_id:user_id});
+        
+        if(!user){
+            return res.status(404).json({message: 'User not found'});
+        }
+
+        const device_index = user.devices.findIndex(device=>device.name === name);
+        if(device_index === -1){
+            return res.status(404).json({message: `Device with device name ${name} not found in the list of registered devices`});
+        }
+
+        user.devices[device_index].power = power;
+        if(brightness !== undefined)
+            user.devices[device_index].brightness = brightness;
+        if(data !== undefined && data.length !== 0)
+            user.devices[device_index].data = data;
+        
+        await user.save();
+        return res.status(200).json({message: 'Device status updated'});
+    }catch(err){
+        return res.status(500).json({message: err});
+    }
+});
+router.get('/status', async (req, res)=>{
+    try{
+        const access_token = req.header('x-auth-token');
+        const acc_check = user_auth.verify_access_token(access_token);
+        if(acc_check.code !== 200){
+            const {code, message} = acc_check;
+            return res.status(code).json({message});
+        }
+        const user_id = acc_check.message;
+        const has_name = req.query.hasOwnProperty('name');
+        if(!has_name){
+            return res.status(400).json({message: "Paarmeter : 'name' is required"});
+        }
+        const name = req.query.name;
+        const device_name_check = device_name_valid.sch_device_name.validate(name);
+
+        if(!device_name_check){
+            return res.status(400).json({message: 'Invalid device name'});
+        }
+
+        const user = await dm_user.findById({_id:user_id});
+        if(!user){
+            return res.status(404).json({message: 'User not found'});
+        }
+
+        const device_index = user.devices.findIndex(device=>device.name === name);
+        if(device_index === -1){
+            return res.status(404).json({message: `Device with device name ${name} not found in the list of registered devices`});
+        }
+        const {power, brightness, data} = user.devices[device_index].status;
+
+        return res.status(200).json({power, brightness, data});
+    }catch(err){
+        console.log(err);
+        return res.status(500).json({message : err});
+    }
+});
+router.get('/statuses', async (req, res)=>{
+    try{
+        const access_token = req.header('x-auth-token');
+        const acc_check = user_auth.verify_access_token(access_token);
+        if(acc_check.code !== 200){
+            const {code, message} = acc_check;
+            return res.status(code).json({message});
+        }
+        const user_id = acc_check.message;
+        const user = dm_user.findById({_id: user_id});
+        if(!user){
+            return res.status(404).json({message: 'User not found'});
+        }
+        const devices_db = user.devices;
+        if(!devices_db && devices.length === 0 ){
+            return res.status(404).json({message: 'No registered found'});
+        }
+
+        const devices = devices_db.filter(device => {return {name: device.name, power: device.status.power, brightness: device.status.brightness, data: device.status.data}});
+        res.status(200).json({devices});
+    }catch(err){
+        return res.status(500).json({message: err});
+    }
+});
 module.exports = router;

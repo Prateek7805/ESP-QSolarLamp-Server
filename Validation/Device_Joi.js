@@ -6,10 +6,12 @@ const register = joi.object({
     password : joi.string().required()
 });
 
+const unregister = joi.object({
+    name: joi.string().required()
+});
 const update = joi.object({
-    name: joi.string().required(),
-    status: joi.boolean().required(),
-    brightness: joi.number(),
+    power: joi.boolean().required(),
+    brightness: joi.number().optional(),
     data: joi.array().items(joi.string()).optional()
 });
 
@@ -17,5 +19,6 @@ const update = joi.object({
 
 module.exports = {
     register, 
-    update
+    update,
+    unregister
 }

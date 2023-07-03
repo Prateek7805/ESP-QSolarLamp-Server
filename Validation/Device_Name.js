@@ -17,7 +17,7 @@ const validate = (name) => {
     }
     return {code: 200, message: "Please enter a device name without spaces"};
 }
-module.exports =  {
+module.exports = {
     sch_device_name,
     validate
 }
