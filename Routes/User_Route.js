@@ -79,7 +79,7 @@ router.post('/signup', async (req, res)=>{
         res.cookie('refresh_token', refresh_token,cookie_options);
 
         // Send an verification mail to user email address.
-        await user_management.send_verification_email(user.email, user.uuid);
+        await user_management.send_verification_email(user.email, user_uuid, user.name);
 
         return res.status(200).json({message: 'User created, please click the link in the verification Email sent to ' + user.email});
     }catch(err){
