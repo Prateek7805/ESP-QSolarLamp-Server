@@ -296,4 +296,17 @@ router.patch('/password', async (req, res)=>{
     }
 });
 
+router.get('/verify', async(req, res) => {
+    try{
+        const uuid = req.query.id;
+        const user_verified = await user_management.verify_user(uuid);
+        if(!user_verified){
+            return res.status(404).json({message: "user not found"});
+        }
+        return res.status(200).json({message: "User verified successfully! Please login to the application."});
+       }catch(err){
+           return res.status(500).json({message: err});
+       }
+});
+
 module.exports = router;

@@ -1,10 +1,11 @@
 require('dotenv').config();
 
 const nodemailer = require('nodemailer');
-const aPI_Urls = require('../Common/API_Urls');
+const aPI_Urls = require('../Common_Utils/API_Urls');
 const HOST_EMAIL = process.env.HOST_EMAIL;
 const HOST_PASSWORD = process.env.HOST_PASSWORD;
 const EMAIL_SERVICE = process.env.EMAIL_SERVICE;
+const dm_user = require('../DBO/Central_User_Device_Sch');
 
 // Send verification mail.
 
@@ -19,7 +20,7 @@ const transporter = nodemailer.createTransport({
     }
   });
 
-  const html = '<h1>Hello ' + name + '!</h1> <p> Please Click on below link for email verification.</p> <p><a href="#">' + aPI_Urls.API_Urls.VerifyEmailURL + user_uuid + '</a></p>';
+  const html = '<h1>Hello ' + name + '!</h1> <p> Please Click on below link for email verification.</p> <p><a href="' + aPI_Urls.VerifyEmailURL + user_uuid + '"> Verify User </a></p>';
   
   // Define the email options
   const mailOptions = {
@@ -39,6 +40,17 @@ transporter.sendMail(mailOptions, (error, info) => {
   });
 }
 
+const verify_user = async(uuid) =>{
+  const user = await dm_user.findOne({verification_uuid: uuid});
+  if(!user){
+    return false;
+  }
+  user.verified = true;
+  await user.save();
+  return true;
+}
+
 module.exports = {
-    send_verification_email
+    send_verification_email,
+    verify_user
 }
