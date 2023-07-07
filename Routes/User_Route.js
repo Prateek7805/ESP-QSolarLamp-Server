@@ -13,6 +13,7 @@ const user_joi = require('../Validation/User_Joi');
 const user_auth = require('../Authentication/User_Auth');
 const dm_license_key = require('../DBO/License_Key_Sch');
 const user_management = require('../BusinessLogic/User_Management');
+const uuid_validator = require('../Validation/UUID');
 
 
 router.use(body_parser.json());
@@ -299,6 +300,13 @@ router.patch('/password', async (req, res)=>{
 router.get('/verify', async(req, res) => {
     try{
         const uuid = req.query.id;
+        if(!uuid){
+            return res.status(403).json({message: "Please add valid uuid."}); 
+        }
+        const uuid_check = uuid_validator.validate(uuid);
+        if(uuid_check.code !== 200){
+            return res.status(uuid_check.code).json({message: uuid_check.message});
+        }
         const user_verified = await user_management.verify_user(uuid);
         if(!user_verified){
             return res.status(404).json({message: "user not found"});
