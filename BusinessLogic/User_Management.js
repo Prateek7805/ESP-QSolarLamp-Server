@@ -9,10 +9,10 @@ const dm_user = require('../DBO/Central_User_Device_Sch');
 
 // Send verification mail.
 
-const send_verification_email = async (user_email, user_uuid, name) => {
+const send_verification_email = async (user_email, user_uuid, user_fname) => {
 
-    // Create a transporter object
-const transporter = nodemailer.createTransport({
+  // Create a transporter object
+  const transporter = nodemailer.createTransport({
     service: EMAIL_SERVICE, // Use 'hotmail' for Outlook.com accounts
     auth: {
       user: HOST_EMAIL, // Your Outlook email address
@@ -20,8 +20,8 @@ const transporter = nodemailer.createTransport({
     }
   });
 
-  const html = '<h1>Hello ' + name + '!</h1> <p> Please Click on below link for email verification.</p> <p><a href="' + aPI_Urls.VerifyEmailURL + user_uuid + '"> Verify User </a></p>';
-  
+  const html = `<h1>Hello ${user_fname}!</h1> <p> Please Click on link below for email verification.</p> <p><a href="${aPI_Urls.VerifyEmailURL}${user_uuid}"> Verify User </a></p>`;
+
   // Define the email options
   const mailOptions = {
     from: HOST_EMAIL, // Sender address
@@ -31,7 +31,7 @@ const transporter = nodemailer.createTransport({
   };
 
   // Send the email
-transporter.sendMail(mailOptions, (error, info) => {
+  transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
       console.error('Error:', error);
     } else {
@@ -40,9 +40,9 @@ transporter.sendMail(mailOptions, (error, info) => {
   });
 }
 
-const verify_user = async(uuid) =>{
-  const user = await dm_user.findOne({verification_uuid: uuid});
-  if(!user){
+const verify_user = async (uuid) => {
+  const user = await dm_user.findOne({ verification_uuid: uuid });
+  if (!user) {
     return false;
   }
   user.verified = true;
@@ -51,6 +51,6 @@ const verify_user = async(uuid) =>{
 }
 
 module.exports = {
-    send_verification_email,
-    verify_user
+  send_verification_email,
+  verify_user
 }

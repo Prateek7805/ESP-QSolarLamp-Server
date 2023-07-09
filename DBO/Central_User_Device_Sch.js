@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
 
 const sch_user = mongoose.Schema({
-    name : String,
+    first_name : String,
+    last_name: String,
     email : {
         type: String,
         unique : true
@@ -16,7 +17,6 @@ const sch_user = mongoose.Schema({
     refresh_tokens : [{
         token : {
             type: String,
-            unique : true
         },
         valid: {
             type: Boolean,

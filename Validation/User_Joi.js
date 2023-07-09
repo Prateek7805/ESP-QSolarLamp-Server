@@ -1,7 +1,8 @@
 const joi = require('joi');
 
 const sign_up = joi.object({
-    name: joi.string().required(),
+    first_name: joi.string().required(),
+    last_name: joi.string().required(),
     email: joi.string().email().required(),
     password: joi.string().required(),
     date_of_birth: joi.string().optional(),

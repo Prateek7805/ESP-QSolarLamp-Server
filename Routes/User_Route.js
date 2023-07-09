@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const body_parser = require('body-parser');
 const cookie_parser = require('cookie-parser');
+const name_valid = require('../Validation/User_Name');
 const pass_valid = require('../Validation/Password');
 const { uuid }  = require('uuidv4');
 
@@ -33,6 +34,20 @@ router.post('/signup', async (req, res)=>{
         if(joi_check.error){
             return res.status(400).json({message: joi_check.error.details});
         }
+        const {first_name, last_name} = req_body;
+        
+        const fname_check = name_valid.validate(first_name);
+        if(fname_check.code !== 200){
+            const {code, message} = fname_check;
+            return res.status(code).json({message});
+        }
+
+        const lname_check = name_valid.validate(last_name);
+        if(lname_check.code !== 200){
+            const {code, message} = lname_check;
+            return res.status(code).json({message});
+        }
+
         const password = req_body.password;
         const pass_check = pass_valid.validate(password);
         
@@ -53,7 +68,7 @@ router.post('/signup', async (req, res)=>{
         
         const hashed_password = await bcrypt.hash(password, 10);
 
-        const user_uuid = await uuid();
+        const user_uuid = uuid();
 
         //create a user in DB
         const user = new dm_user({
@@ -63,24 +78,10 @@ router.post('/signup', async (req, res)=>{
         });
 
         await user.save();
-
         // Send an verification mail to user email address.
         // Create a uuidv4 and save in a variable, save the uuid in user collection.
         // Email contains link like http://localhost:8000/verify_user?id={uuidv4}.
-        const access_token = user_auth.get_access_token(user._id);
-        const refresh_token = user_auth.get_refresh_token(user._id);
-
-        const save_result = await user_auth.save_ref_token_db(user._id, refresh_token);
-
-        if(save_result.code !== 200){
-            const {code, message} = save_result; 
-            return res.status(code).json({message});
-        }
-
-        res.cookie('refresh_token', refresh_token,cookie_options);
-
-        // Send an verification mail to user email address.
-        await user_management.send_verification_email(user.email, user_uuid, user.name);
+        await user_management.send_verification_email(user.email, user_uuid, user.first_name);
 
         return res.status(200).json({message: 'User created, please click the link in the verification Email sent to ' + user.email});
     }catch(err){
