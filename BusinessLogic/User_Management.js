@@ -41,6 +41,7 @@ const send_verification_email = async (user_email, user_uuid, user_fname) => {
 }
 
 const verify_user = async (uuid) => {
+  //Need to add try catch and code, message style
   const user = await dm_user.findOne({ verification_uuid: uuid });
   if (!user) {
     return false;

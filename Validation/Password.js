@@ -20,7 +20,7 @@ const validate = (password)=>{
     if(pel.length === 0) return {code: 200, message: 'password validated'};
     if(initial_check.some(item=>pel.includes(item)))
         return {code: 400, message: 'Please enter a password between 8 and 20 characters'};
-    return {code: 400, message: `Please enter a password with atleast 1 ${pel.join(',')} characters`};
+    return {code: 400, message: `Please enter a password with atleast 1 ${pel.join(', ')} characters`};
     
 }
 module.exports =  {
