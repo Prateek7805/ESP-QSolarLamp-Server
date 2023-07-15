@@ -3,7 +3,9 @@ const router = express.Router();
 const body_parser = require('body-parser');
 const cookie_parser = require('cookie-parser');
 const name_valid = require('../Validation/User_Name');
+const email_valid = require('../Validation/User_Email');
 const pass_valid = require('../Validation/Password');
+const dob_valid = require('../Validation/User_DOB');
 const { uuid }  = require('uuidv4');
 
 //bcrypt
@@ -48,6 +50,21 @@ router.post('/signup', async (req, res)=>{
             return res.status(code).json({message});
         }
 
+        const {email} = req_body;
+        const email_check = email_valid.validate(email);
+        
+        if(email_check.code !== 200){
+            const {code, message} = email_check;
+            return res.status(code).json({message});
+        }
+        const date_of_birth = req_body?.date_of_birth;
+        const dob_check = dob_valid.validate(date_of_birth);
+
+        if(dob_check.code !== 200){
+            const {code, message} = dob_check;
+            return res.status(code).json({message});
+        }
+
         const password = req_body.password;
         const pass_check = pass_valid.validate(password);
         
@@ -58,7 +75,6 @@ router.post('/signup', async (req, res)=>{
         }
 
         //check user in DB
-        const email = req_body.email;
         const existing_user = await dm_user.findOne({email});
 
         if(existing_user){
