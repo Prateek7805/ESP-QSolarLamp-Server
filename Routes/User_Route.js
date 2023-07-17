@@ -26,7 +26,8 @@ const dev_mode = process.env.DEV === 'true';
 const cookie_options = {
     httpOnly: true,
     secure: !dev_mode,
-    sameSite: 'none'
+    sameSite: 'none',
+    domain: 'https://qsolarlamp.netlify.app'
 }
 
 router.post('/signup', async (req, res)=>{
