@@ -26,7 +26,7 @@ const dev_mode = process.env.DEV === 'true';
 const cookie_options = {
     httpOnly: true,
     secure: !dev_mode,
-    sameSite: 'Strict'
+    sameSite: 'none'
 }
 
 router.post('/signup', async (req, res)=>{
@@ -152,6 +152,7 @@ router.post('/login', async (req, res)=>{
             const {code, message} = save_result; 
             return res.status(code).json({message});
         }
+        res.header
         res.cookie('refresh_token', refresh_token, cookie_options);
 
         return res.status(200).json({access_token});
@@ -251,6 +252,7 @@ router.get('/access_token', async (req, res)=>{
         const {user_id, rolled_refresh_token} = ref_check.message;
         
         const access_token = user_auth.get_access_token(user_id);
+        
         res.cookie('refresh_token', rolled_refresh_token, cookie_options);
         res.status(200).json({access_token});
     }catch(err){

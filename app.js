@@ -12,7 +12,18 @@ const user_router = require('./Routes/User_Route');
 const device_router = require('./Routes/Device_Route');
 
 app.use(cookie_parser());
-app.use(cors());
+// Allow requests from the specific origin (your React app's domain)
+const allowed_clients = process.env.ALLOWED_CLIENT_END_POINTS;
+
+const allowed_clients_array = allowed_clients.split(',');
+
+// CORS options to handle credentials
+const cors_options = {
+  origin: allowed_clients_array,
+  credentials: true, // Allow cookies, authorization headers, etc.
+};
+
+app.use(cors(cors_options));
 
 app.use('/', user_router);
 app.use('/', device_router);

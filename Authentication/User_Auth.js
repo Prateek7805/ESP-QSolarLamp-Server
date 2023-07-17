@@ -42,7 +42,7 @@ const verify_access_token = (token)=>{
         const {user_id} = decoded;
         return {code : 200, message: user_id};
     }catch(err){
-        return { code : 403, message : "invalid jwt"};
+        return { code : 401, message : "invalid jwt"};
     }
 }
 
@@ -50,7 +50,7 @@ const verify_access_token = (token)=>{
 const verify_refresh_token = async (token)=>{
     try{
         if(!token){
-            return {code : 404, message : "No token found"};
+            return {code : 404, message : "No refresh token found"};
         }
         const secret_key = process.env.REFRESH_SECRET_KEY;
         const decoded = jwt.verify(token, secret_key);
