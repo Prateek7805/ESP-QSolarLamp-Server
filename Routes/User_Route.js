@@ -152,7 +152,8 @@ router.post('/login', async (req, res)=>{
             const {code, message} = save_result; 
             return res.status(code).json({message});
         }
-        res.header
+        res.setHeader('Access-Control-Allow-Origin', 'https://qsolarlamp.onrender.com'); // Replace with your React app's domain
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
         res.cookie('refresh_token', refresh_token, cookie_options);
 
         return res.status(200).json({access_token});
