@@ -20,7 +20,30 @@ const send_verification_email = async (user_email, user_uuid, user_fname) => {
     }
   });
 
-  const html = `<h1>Hello ${user_fname}!</h1> <p> Please Click on link below for email verification.</p> <p><a href="${aPI_Urls.VerifyEmailURL}${user_uuid}"> Verify User </a></p>`;
+  const html = `<style>
+                  .verify-btn-container{
+                      display: flex;
+                      width: 100vw;
+                      justify-content: center;
+                  }
+                  .verify-btn{
+                      border: none;
+                      border-bottom: 5px solid #F1C93B;
+                      padding: 15px; 
+                      background-color: #164B60;
+                      color: #FFFFFF;
+                      border-radius: 10px;
+                      
+                  }
+                  .verify-btn:active{
+                    border-bottom: none;
+                    transform:scale(0.96);
+                  }
+                  </style>
+                  <h1 style="text-align: center">Greetings ${user_fname}!</h1> 
+                  <p style="text-align: center;"> Please Click on the below button to verify your Email</p> 
+                  <div class="verify-btn-container"><a href="${aPI_Urls.VerifyEmailURL}${user_uuid}"><button class="verify-btn"> Verify User </button></a></div>
+`;
 
   // Define the email options
   const mailOptions = {
