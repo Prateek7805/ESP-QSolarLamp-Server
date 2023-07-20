@@ -3,18 +3,19 @@ const router = express.Router();
 const body_parser = require('body-parser');
 const cookie_parser = require('cookie-parser');
 
+const user_joi = require('../Validation/User_Joi');
 const user_valid = require('../Validation/User');
+const user_auth = require('../Authentication/User_Auth');
+
 const { uuid } = require('uuidv4');
 
 //bcrypt
 const bcrypt = require('bcrypt');
 
 const dm_user = require('../DBO/Central_User_Device_Sch');
-const user_joi = require('../Validation/User_Joi');
-const user_auth = require('../Authentication/User_Auth');
+
 const dm_license_key = require('../DBO/License_Key_Sch');
 const user_management = require('../BusinessLogic/User_Management');
-const uuid_validator = require('../Validation/UUID');
 
 
 router.use(body_parser.json());
@@ -34,7 +35,7 @@ router.post('/signup', async (req, res) => {
         if (joi_check.error) {
             return res.status(400).json({ message: joi_check.error.details });
         }
-        //origin check
+
         const origin_URL = req_body.origin;
         const origin_check = user_valid.origin(origin_URL);
         if(origin_check.code !== 200){
@@ -334,8 +335,8 @@ router.get('/verify', async (req, res) => {
             return res.status(code).json({message});
         }
         const origin_url = origin_id_check.message;
-        console.log(origin_url);
-        const uuid_check = uuid_validator.validate(uuid);
+
+        const uuid_check = user_valid.uuid(uuid);
         if (uuid_check.code !== 200) {
             const {code, message} = uuid_check;
             return res.status(code).json({message});

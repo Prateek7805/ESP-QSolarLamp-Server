@@ -85,6 +85,22 @@ const dob = (date_of_birth) => {
     }
 }
 
+const uuid = (data) => {
+    const user_uuid_validator = new pv();
+
+    user_uuid_validator.has().not().spaces();
+
+    if (!data) {
+        return { code: 404, message: "No UUID found" };
+    }
+    const uuid_check = user_uuid_validator.validate(data, { list: true });
+    if (uuid_check.length !== 0) {
+        return { code: 400, message: "Please provide a UUID without spaces" };
+    }
+    const regex = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/gi;
+    if (!regex.test(data)) return { code: 400, message: "Invalid UUID format error" };
+    return { code: 200, message: "UUID validated successfully." };
+}
 const origin = (data) => {
     if (!data) {
         return { code: 404, message: 'Origin ID not found' };
@@ -122,4 +138,11 @@ const origin_id = (data) => {
     }
 }
 
-module.exports = { user_name, email, password, dob, origin, origin_id };
+module.exports = {
+    user_name,
+    email,
+    password,
+    dob, uuid,
+    origin,
+    origin_id
+};
