@@ -42,13 +42,20 @@ const send_verification_email = async (user_email, user_uuid, user_fname) => {
 
 const verify_user = async (uuid) => {
   //Need to add try catch and code, message style
+  try{
   const user = await dm_user.findOne({ verification_uuid: uuid });
   if (!user) {
-    return false;
+    return {code : 404, message: "User not found"};
+  }
+  if(user.verified){
+    return {code: 409, message: "User already verified"};
   }
   user.verified = true;
   await user.save();
-  return true;
+  return {code : 200, message: "User verified"};
+}catch(err){
+  return {code : 500, message: err};
+}
 }
 
 module.exports = {
