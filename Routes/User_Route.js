@@ -2,10 +2,7 @@ const express = require('express');
 const router = express.Router();
 const body_parser = require('body-parser');
 const cookie_parser = require('cookie-parser');
-const name_valid = require('../Validation/User_Name');
-const email_valid = require('../Validation/User_Email');
-const pass_valid = require('../Validation/Password');
-const dob_valid = require('../Validation/User_DOB');
+
 const user_valid = require('../Validation/User');
 const { uuid } = require('uuidv4');
 
@@ -47,27 +44,27 @@ router.post('/signup', async (req, res) => {
         const origin_id = origin_check.message;
         const { first_name, last_name } = req_body;
 
-        const fname_check = name_valid.validate(first_name);
+        const fname_check = user_valid.user_name(first_name);
         if (fname_check.code !== 200) {
             const { code, message } = fname_check;
             return res.status(code).json({ message });
         }
 
-        const lname_check = name_valid.validate(last_name);
+        const lname_check = user_valid.user_name(last_name);
         if (lname_check.code !== 200) {
             const { code, message } = lname_check;
             return res.status(code).json({ message });
         }
 
         const { email } = req_body;
-        const email_check = email_valid.validate(email);
-
+        const email_check = user_valid.email(email);
         if (email_check.code !== 200) {
             const { code, message } = email_check;
             return res.status(code).json({ message });
         }
+
         const date_of_birth = req_body?.date_of_birth;
-        const dob_check = dob_valid.validate(date_of_birth);
+        const dob_check = user_valid.dob(date_of_birth);
 
         if (dob_check.code !== 200) {
             const { code, message } = dob_check;
@@ -75,7 +72,7 @@ router.post('/signup', async (req, res) => {
         }
 
         const password = req_body.password;
-        const pass_check = pass_valid.validate(password);
+        const pass_check = user_valid.password(password);
 
         //username, Email, password checks
         if (pass_check.code !== 200) {
@@ -126,8 +123,8 @@ router.post('/login', async (req, res) => {
         //check user in DB
 
         const password = req_body.password;
-        const pass_rule_check = pass_valid.sch_password.validate(password);
-        if (!pass_rule_check) {
+        const pass_rule_check = user_valid.password(password);
+        if (pass_rule_check.code !== 200) {
             return res.status(400).json({ message: `Invalid Email or password` }); //Incorrect password rules need to check DB
         }
         const email = req_body.email;
@@ -213,8 +210,8 @@ router.post('/remove', async (req, res) => {
             return res.status(400).json({ message: joi_check.error.details });
         }
         const password = req_body.password;
-        const pass_rule_check = pass_valid.sch_password.validate(password);
-        if (!pass_rule_check) {
+        const pass_rule_check = user_valid.password(password);
+        if (pass_rule_check.code !== 200) {
             return res.status(401).json({ message: 'Invalid Password' });
         }
         const user_id = acc_check.message;
@@ -290,12 +287,12 @@ router.patch('/password', async (req, res) => {
         const req_body = req.body;
         const { old_password, new_password } = req_body;
 
-        const old_pass_check = pass_valid.sch_password.validate(old_password);
-        if (!old_pass_check) {
+        const old_pass_check = user_valid.password(old_password);
+        if (old_pass_check.code !== 200) {
             return res.status(401).json({ message: "Old Password is Invalid" });
         }
 
-        const new_pass_check = pass_valid.validate(new_password);
+        const new_pass_check = user_valid.password(new_password);
         if (new_pass_check.code !== 200) {
             const { code, message } = new_pass_check;
             return res.status(code).json({ message });
