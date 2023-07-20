@@ -1,7 +1,7 @@
 require('dotenv').config();
 
 const nodemailer = require('nodemailer');
-const aPI_Urls = require('../Common_Utils/API_Urls');
+const API_Urls = require('../Common_Utils/API_Urls');
 const HOST_EMAIL = process.env.HOST_EMAIL;
 const HOST_PASSWORD = process.env.HOST_PASSWORD;
 const EMAIL_SERVICE = process.env.EMAIL_SERVICE;
@@ -9,7 +9,7 @@ const dm_user = require('../DBO/Central_User_Device_Sch');
 
 // Send verification mail.
 
-const send_verification_email = async (user_email, user_uuid, user_fname) => {
+const send_verification_email = async (origin_id, user_email, user_uuid, user_fname) => {
 
   // Create a transporter object
   const transporter = nodemailer.createTransport({
@@ -23,8 +23,9 @@ const send_verification_email = async (user_email, user_uuid, user_fname) => {
   const html = `<style>
                   .verify-btn-container{
                       display: flex;
-                      width: 100vw;
+                      width: 100%;
                       justify-content: center;
+                      margin-top: 10px;
                   }
                   .verify-btn{
                       border: none;
@@ -33,7 +34,6 @@ const send_verification_email = async (user_email, user_uuid, user_fname) => {
                       background-color: #164B60;
                       color: #FFFFFF;
                       border-radius: 10px;
-                      
                   }
                   .verify-btn:active{
                     border-bottom: none;
@@ -42,14 +42,13 @@ const send_verification_email = async (user_email, user_uuid, user_fname) => {
                   </style>
                   <h1 style="text-align: center">Greetings ${user_fname}!</h1> 
                   <p style="text-align: center;"> Please Click on the below button to verify your Email</p> 
-                  <div class="verify-btn-container"><a href="${aPI_Urls.VerifyEmailURL}${user_uuid}"><button class="verify-btn"> Verify User </button></a></div>
+                  <div class="verify-btn-container"><a href="${API_Urls.VerifyEmailURL}/verify?id=${user_uuid}&origin_id=${origin_id}" target="_blank"><button class="verify-btn"> Verify User </button></a></div>
 `;
-
   // Define the email options
   const mailOptions = {
     from: HOST_EMAIL, // Sender address
     to: user_email, // Recipient address
-    subject: 'User Registration Confirmation.', // Email subject
+    subject: 'Qsolarlamp Registration Confirmation', // Email subject
     html: html // Email body
   };
 
@@ -65,20 +64,20 @@ const send_verification_email = async (user_email, user_uuid, user_fname) => {
 
 const verify_user = async (uuid) => {
   //Need to add try catch and code, message style
-  try{
-  const user = await dm_user.findOne({ verification_uuid: uuid });
-  if (!user) {
-    return {code : 404, message: "User not found"};
+  try {
+    const user = await dm_user.findOne({ verification_uuid: uuid });
+    if (!user) {
+      return { code: 404, message: "User not found" };
+    }
+    if (user.verified) {
+      return { code: 409, message: "User already verified" };
+    }
+    user.verified = true;
+    await user.save();
+    return { code: 200, message: "User verified" };
+  } catch (err) {
+    return { code: 500, message: err };
   }
-  if(user.verified){
-    return {code: 409, message: "User already verified"};
-  }
-  user.verified = true;
-  await user.save();
-  return {code : 200, message: "User verified"};
-}catch(err){
-  return {code : 500, message: err};
-}
 }
 
 module.exports = {

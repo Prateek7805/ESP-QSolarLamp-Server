@@ -6,6 +6,7 @@ const name_valid = require('../Validation/User_Name');
 const email_valid = require('../Validation/User_Email');
 const pass_valid = require('../Validation/Password');
 const dob_valid = require('../Validation/User_DOB');
+const user_valid = require('../Validation/User');
 const { uuid } = require('uuidv4');
 
 //bcrypt
@@ -36,6 +37,14 @@ router.post('/signup', async (req, res) => {
         if (joi_check.error) {
             return res.status(400).json({ message: joi_check.error.details });
         }
+        //origin check
+        const origin_URL = req_body.origin;
+        const origin_check = user_valid.origin(origin_URL);
+        if(origin_check.code !== 200){
+            const {code, message} = origin_check;
+            return res.status(code).json({message});
+        }
+        const origin_id = origin_check.message;
         const { first_name, last_name } = req_body;
 
         const fname_check = name_valid.validate(first_name);
@@ -97,7 +106,7 @@ router.post('/signup', async (req, res) => {
         // Send an verification mail to user email address.
         // Create a uuidv4 and save in a variable, save the uuid in user collection.
         // Email contains link like http://localhost:8000/verify_user?id={uuidv4}.
-        await user_management.send_verification_email(user.email, user_uuid, user.first_name);
+        await user_management.send_verification_email(origin_id, user.email, user_uuid, user.first_name);
 
         return res.status(200).json({ message: 'User created, please click the link in the verification Email sent to ' + user.email });
     } catch (err) {
@@ -318,17 +327,31 @@ router.patch('/password', async (req, res) => {
 
 router.get('/verify', async (req, res) => {
     try {
-        const uuid = req.query.id;
+
+        const uuid = req.query?.id;
+        const origin_id = req.query?.origin_id;
+
+        const origin_id_check = user_valid.origin_id(origin_id);
+        if(origin_id_check.code !== 200){
+            const {code, message} = origin_id_check;
+            return res.status(code).json({message});
+        }
+        const origin_url = origin_id_check.message;
+        console.log(origin_url);
         const uuid_check = uuid_validator.validate(uuid);
         if (uuid_check.code !== 200) {
-            return res.status(uuid_check.code).json({ message: uuid_check.message });
+            const {code, message} = uuid_check;
+            return res.status(code).json({message});
         }
+
         const user_verified = await user_management.verify_user(uuid);
         if (user_verified.code !== 200) {
             const { code, message } = user_verified;
             return res.status(code).json({ message });
         }
-        return res.status(200).json({ message: "User verified successfully! Please login to the application." });
+
+        return res.redirect(origin_url);
+
     } catch (err) {
         return res.status(500).json({ message: err });
     }
