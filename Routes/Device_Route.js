@@ -157,8 +157,7 @@ router.get('/devices', async (req, res)=>{
         if(!user){
             return res.status(404).json({message: 'User not found'});
         }
-        
-        
+
         const devices = user.devices.map(device=>{return {name: device.name}});
         return res.status(200).json({devices});
 
@@ -269,11 +268,9 @@ router.get('/statuses', async (req, res)=>{
             return res.status(404).json({message: 'User not found'});
         }
         const devices_db = user.devices;
-        console.log(devices_db);
         if(!devices_db){
             return res.status(404).json({message: 'No registered found'});
         }
-
         const devices = devices_db.map(device => {return {name: device.name, power: device.status.power, brightness: device.status.brightness, data: device.status.data}});
         res.status(200).json({devices});
     }catch(err){

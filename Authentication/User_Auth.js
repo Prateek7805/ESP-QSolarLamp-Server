@@ -3,8 +3,8 @@ const jwt = require('jsonwebtoken');
 
 const dm_user = require('../DBO/Central_User_Device_Sch');
 
-const ACCESS_TOKEN_TIMEOUT = "20m";
-const REFRESH_TOKEN_TIMEOUT = "3d";
+const ACCESS_TOKEN_TIMEOUT = process.env.ACCESS_TOKEN_TIMEOUT;
+const REFRESH_TOKEN_TIMEOUT = process.env.REFRESH_TOKEN_TIMEOUT;
 //helper functions
 const get_token_sign = (token) => {
     const signIndex = token.lastIndexOf('.') + 1;
