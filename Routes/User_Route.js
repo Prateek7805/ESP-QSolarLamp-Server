@@ -177,13 +177,10 @@ router.get('/logout', async (req, res) => {
             const { code, message } = acc_check;
             return res.status(code).json(message);
         }
+        
         const user_id = acc_check.message;
-
         const refresh_token = req.cookies?.refresh_token;
-        console.log(refresh_token);
-
         const ref_check = await user_auth.remove_ref_token_db(user_id, refresh_token);
-
         res.clearCookie('refresh_token');
 
         if (ref_check.code !== 200) {
@@ -251,7 +248,6 @@ router.post('/remove', async (req, res) => {
 router.get('/access_token', async (req, res) => {
     try {
         const refresh_token = req.cookies?.refresh_token;
-        console.log(refresh_token);
         const ref_check = await user_auth.verify_refresh_token(refresh_token);
         if (ref_check.code !== 200) {
             const { code, message } = ref_check;
