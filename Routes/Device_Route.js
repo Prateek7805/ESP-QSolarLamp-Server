@@ -176,7 +176,7 @@ router.patch('/status', async (req, res)=>{
         const user_id = acc_check.message;
         const has_name = req.query.hasOwnProperty('name');
         if(!has_name){
-            return res.status(400).json({message: "Paarmeter : 'name' is required"});
+            return res.status(400).json({message: "Parameter : 'name' is required"});
         }
         const name = req.query.name;
 
@@ -205,11 +205,11 @@ router.patch('/status', async (req, res)=>{
             return res.status(404).json({message: `Device with device name ${name} not found in the list of registered devices`});
         }
 
-        user.devices[device_index].power = power;
+        user.devices[device_index].status.power = power;
         if(brightness !== undefined)
-            user.devices[device_index].brightness = brightness;
+            user.devices[device_index].status.brightness = brightness;
         if(data !== undefined && data.length !== 0)
-            user.devices[device_index].data = data;
+            user.devices[device_index].status.data = data;
         
         await user.save();
         return res.status(200).json({message: 'Device status updated'});
