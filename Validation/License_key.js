@@ -7,7 +7,7 @@ async function validate(lkey){
         const regex = /[^a-zA-Z0-9]/;
         if(regex.test(lkey)) return {code:  400, message : "license key content error"};
         const lkey_check = await dm_license_key.findOne({license_key: lkey});
-        if(!lkey_check) return {code: 404, message : "license key integrity error"};
+        if(!lkey_check) return {code: 400, message : "license key integrity error"};
         if(!lkey_check.valid) return {code: 403, message : "license key validity error"};
         if(lkey_check.device_id) return {code: 409, message: "license key already registered to a user"};
         return {code : 200, message: lkey_check};

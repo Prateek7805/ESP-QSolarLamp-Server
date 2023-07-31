@@ -69,7 +69,8 @@ router.post('/register', async (req, res)=>{
             password: hashed_password,
             status: {
                 power : false,
-                brightness: 30
+                brightness: 30,
+                data:[]
             }
         };
         user.devices.push(new_device);
@@ -83,7 +84,12 @@ router.post('/register', async (req, res)=>{
         license_key_db.device_id = device_id;
         await license_key_db.save();
 
-        return res.status(200).json({message: 'Device successfully registered'});
+        return res.status(200).json({message: {
+            name: new_device.name,
+            power: new_device.status.power,
+            brightness: new_device.status.brightness,
+            data: new_device.status.data
+        }});
 
     }catch(err){
         console.log(err);
