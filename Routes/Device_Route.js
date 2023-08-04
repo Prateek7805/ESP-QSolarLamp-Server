@@ -192,7 +192,9 @@ router.patch('/status', async (req, res)=>{
         if(joi_check.error){
             return res.status(400).json({message: joi_check.error.details});
         }
-        
+        if(Object.keys(req_body).length === 0){
+            return res.status(400).json({message: "Request body empty"});
+        }
         const {power, brightness, data} = req_body;
         const device_name_check = device_name_valid.sch_device_name.validate(name);
 
@@ -211,7 +213,8 @@ router.patch('/status', async (req, res)=>{
             return res.status(404).json({message: `Device with device name ${name} not found in the list of registered devices`});
         }
 
-        user.devices[device_index].status.power = power;
+        if(power !== undefined)
+            user.devices[device_index].status.power = power;
         if(brightness !== undefined)
             user.devices[device_index].status.brightness = brightness;
         if(data !== undefined && data.length !== 0)
@@ -277,8 +280,9 @@ router.get('/statuses', async (req, res)=>{
         if(!devices_db){
             return res.status(404).json({message: 'No registered found'});
         }
+        const initials = user.first_name.substring(0, 1);
         const devices = devices_db.map(device => {return {name: device.name, power: device.status.power, brightness: device.status.brightness, data: device.status.data}});
-        res.status(200).json({devices});
+        res.status(200).json({initials, devices});
     }catch(err){
         console.log(err);
         return res.status(500).json({message: err});
