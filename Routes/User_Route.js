@@ -17,7 +17,6 @@ const dm_user = require('../DBO/Central_User_Device_Sch');
 const dm_license_key = require('../DBO/License_Key_Sch');
 const user_management = require('../BusinessLogic/User_Management');
 
-
 router.use(body_parser.json());
 router.use(cookie_parser());
 const dev_mode = process.env.DEV === 'true';
@@ -108,7 +107,6 @@ router.post('/signup', async (req, res) => {
 
         return res.status(200).json({ message: 'User created, please click the link in the verification Email sent to ' + user.email });
     } catch (err) {
-        console.log(err);
         return res.status(500).json({ message: err });
     }
 
@@ -166,7 +164,6 @@ router.post('/login', async (req, res) => {
     } catch (err) {
         return res.status(500).json({ message: err });
     }
-
 });
 
 router.get('/logout', async (req, res) => {
@@ -177,7 +174,7 @@ router.get('/logout', async (req, res) => {
             const { code, message } = acc_check;
             return res.status(code).json(message);
         }
-        
+
         const user_id = acc_check.message;
         const refresh_token = req.cookies?.refresh_token;
         const ref_check = await user_auth.remove_ref_token_db(user_id, refresh_token);
@@ -237,7 +234,6 @@ router.post('/remove', async (req, res) => {
             await active_license.save();
         }
         const dUser = await dm_user.findByIdAndDelete({ _id });
-        console.log(dUser);
         res.clearCookie('refresh_token');
         return res.status(200).json({ message: `user ${user.email} has been removed` });
     } catch (err) {

@@ -96,9 +96,8 @@ router.post('/register', async (req, res)=>{
         return res.status(500).json({message: err});
     }
 });
-router.post('/unregister', async (req, res)=>{
+router.delete('/device', async(req, res)=>{
     try{
-        // If device unregistered then just clear LittleFS user info from device and creds (reset)
         const access_token = req.header('x-auth-token');
         const acc_check = user_auth.verify_access_token(access_token);
         if(acc_check.code !== 200){
@@ -106,15 +105,11 @@ router.post('/unregister', async (req, res)=>{
             return res.status(code).json({message});
         }
         const user_id = acc_check.message;
-        const req_body = req.body;
-        const joi_check = device_joi.unregister.validate(req_body);
-
-        if(joi_check.error){
-            return res.status(400).json({message: joi_check.error.details});
+        const has_name = req.query.hasOwnProperty('name');
+        if(!has_name){
+            return res.status(400).json({message: "Parameter : 'name' is required"});
         }
-
-        const {name} = req_body;
-
+        const name = req.query.name;
         const device_name_check = device_name_valid.sch_device_name.validate(name);
         if(!device_name_check){
             return res.status(400).json({message: 'Device name is invalid'});
@@ -144,7 +139,6 @@ router.post('/unregister', async (req, res)=>{
 
         return res.status(200).json({message: 'Device removed'});
     }catch(err){
-        console.log(err);
         return res.status(500).json({message: err});
     }
 });
