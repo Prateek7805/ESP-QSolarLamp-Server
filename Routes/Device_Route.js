@@ -284,6 +284,7 @@ router.get('/statuses', async (req, res)=>{
 });
 router.patch('/name', async (req, res)=>{
     try{
+        //access token check
         const access_token = req.header('x-auth-token');
         const acc_check = user_auth.verify_access_token(access_token);
         if(acc_check.code !== 200){
@@ -292,6 +293,7 @@ router.patch('/name', async (req, res)=>{
         }
         const user_id = acc_check.message;
         const req_body = req.body;
+        //req body check
         const joi_check =device_joi.update_name.validate(req_body);
         if(joi_check.error){
             return res.status(400).json({message: joi_check.error.details});
@@ -306,24 +308,28 @@ router.patch('/name', async (req, res)=>{
             const {code, message} = new_name_check;
             return res.status(code).json({message});
         }
+        //get the user document
         const user = await dm_user.findById({_id: user_id});
         if(!user){
             return res.status(404).json({message: 'User not found'});
         }
-
-        const device_index = user.devices.findIndex(device=>{device.name === old_name});
+        //check if the new name exists
+        if(user.devices.findIndex(device=>device.name === new_name) !== -1){
+            return res.status(409).json({message: `Device with name ${new_name} already exists please try a different name`});
+        }
+        //get device index
+        const device_index = user.devices.findIndex(device=>{return device.name === old_name});
         
         if(device_index === -1){
             return res.status(404).json({message: `Device with name : ${old_name} not found`});
         }
-
         //update the device name
 
         user.devices[device_index].name = new_name;
 
         await user.save();
-
-        return res.status(200).json({message: 'Device name changed successfully'});
+        const message = {name: new_name};
+        return res.status(200).json({message});
 
     }catch(err){
         console.log(err);
@@ -341,7 +347,7 @@ router.patch('/password', async (req, res)=>{
 
         const user_id = acc_check.message;
         const req_body = req.body;
-        const joi_check = device_joi.update_password(req_body);
+        const joi_check = device_joi.update_password.validate(req_body);
         if(joi_check.error){
             return res.status(400).json({message: joi_check.error.details});
         }

@@ -26,7 +26,7 @@ const cors_options = {
 app.use(cors(cors_options));
 
 app.use('/', user_router);
-app.use('/', device_router);
+app.use('/device', device_router);
 
 app.listen(PORT, ()=>{
     console.log(`Server started on ${PORT}`);
