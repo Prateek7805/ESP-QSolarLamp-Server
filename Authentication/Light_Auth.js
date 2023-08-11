@@ -20,7 +20,6 @@ const verify_token = (token)=>{
             return {code : 404, message : "No token found"};
         }
         const secret_key = process.env.DEVICE_ACCESS_SECRET_KEY;
-        console.log(secret_key);
         const decoded = jwt.verify(token, secret_key);
         const {device_id} = decoded;
         return {code : 200, message: device_id};
