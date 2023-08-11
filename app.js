@@ -10,6 +10,8 @@ const PORT = process.env.PORT || 8003;
 //routes
 const user_router = require('./Routes/User_Route');
 const device_router = require('./Routes/Device_Route');
+const light_router = require('./Routes/Light_Route');
+
 
 app.use(cookie_parser());
 // Allow requests from the specific origin (your React app's domain)
@@ -27,6 +29,7 @@ app.use(cors(cors_options));
 
 app.use('/', user_router);
 app.use('/device', device_router);
+app.use('/light', light_router);
 
 app.listen(PORT, ()=>{
     console.log(`Server started on ${PORT}`);

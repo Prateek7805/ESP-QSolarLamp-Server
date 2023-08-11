@@ -61,11 +61,8 @@ const verify_refresh_token = async (token)=>{
         const db_user = await dm_user.findById({_id: user_id});
         
         const token_exists = db_user.refresh_tokens.some(_token => _token.token === sign);
-        console.log(`result: ${db_user.refresh_tokens.some(_token => _token.token === sign)}`);
         if(!token_exists){
-            db_user.refresh_tokens = [];
-            await db_user.save();
-            return {code: 404, message: 'old refresh token received logging out from all devices'};
+            return { code : 403, message : "invalid jwt"};
         }
 
         //refresh token verified

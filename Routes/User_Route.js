@@ -191,6 +191,37 @@ router.get('/logout', async (req, res) => {
     }
 });
 
+router.get('/user', async (req, res) => {
+    try {
+        //access token check
+        const access_token = req.header('x-auth-token');
+        const acc_check = user_auth.verify_access_token(access_token);
+        if (acc_check.code !== 200) {
+            const { code, message } = acc_check;
+            return res.status(code).json({ message });
+        }
+        const user_id = acc_check.message;
+        const user = await dm_user.findById({ _id: user_id });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const registered_device_count = Array.isArray(user.devices) ? user.devices.length : 0;
+        const active_device_count = Array.isArray(user.devices) ? user.devices.filter(device=>device.locked === false).length : 0;
+
+        const res_data = {
+            first_name: user.first_name,
+            last_name: user.last_name,
+            email: user.email,
+            registered_device_count: registered_device_count,
+            active_device_count: active_device_count,
+        }
+        return res.status(200).json({message: res_data});
+    } catch (err) {
+        return res.status(500).json({ message: "An unexpected error occured at the server" });
+    }
+});
+
 router.post('/remove', async (req, res) => {
     try {
         const access_token = req.header('x-auth-token');

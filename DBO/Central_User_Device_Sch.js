@@ -26,6 +26,7 @@ const sch_user = mongoose.Schema({
     devices: [{
         name : String,
         password : String,
+        locked: Boolean,
         status: {
             power : {
                 type: Boolean,
