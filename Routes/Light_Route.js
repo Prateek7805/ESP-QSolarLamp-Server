@@ -43,6 +43,10 @@ router.post('/login', async (req, res) => {
             return res.status(404).json({ message: "User not registered" });
         }
         const device = user.devices[0];
+        const locked = device.locked;
+        if(locked){
+            return res.status(403).json({message: "Device is locked, please contact support"});
+        }
         const device_name_check = device.name === name;
         if (!device_name_check) {
             return res.status(404).json({ message: "Device name incorrect" });
@@ -52,7 +56,7 @@ router.post('/login', async (req, res) => {
         if (!password_check) {
             return res.status(401).json({ message: "Incorrect Password" });
         }
-        const token = light_auth.get_token();
+        const token = light_auth.get_token(device_id);
         return res.status(200).json({ token });
     } catch (err) {
         console.log(err);
@@ -69,7 +73,9 @@ router.get('/status', async (req, res)=>{
             return res.status(code).json({message});
         }
         const device_id = token_check.message;
-        const user = await dm_user.findOne({'devices._id': device_id}, { "devices.$": 1 });
+        const user = await dm_user.findOne({'devices._id': device_id}, {'_id': 0, 'devices.$' : 1});
+        const device_status = user.devices[0].status;
+        return res.status(200).json(device_status);
     }catch(err){
         console.log(err);
         return res.status(500).json({ message: err });

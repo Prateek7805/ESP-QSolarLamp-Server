@@ -155,7 +155,7 @@ router.get('/devices', async (req, res) => {
         }
 
         const user_id = acc_check.message;
-        const user = await dm_user.findById({ _id: user_id });
+        const user = await dm_user.findById({ _id: user_id }, "devices");
 
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
@@ -238,23 +238,17 @@ router.get('/status', async (req, res) => {
         }
         const name = req.query.name;
         const device_name_check = device_name_valid.sch_device_name.validate(name);
-
         if (!device_name_check) {
             return res.status(400).json({ message: 'Invalid device name' });
         }
 
-        const user = await dm_user.findById({ _id: user_id });
+        const user = await dm_user.findOne({'_id': user_id, 'devices.name' : name}, {'_id' : 0, 'devices.$' : 1});
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            return res.status(404).json({ message: `User or device not found` });
         }
 
-        const device_index = user.devices.findIndex(device => device.name === name);
-        if (device_index === -1) {
-            return res.status(404).json({ message: `Device with device name ${name} not found in the list of registered devices` });
-        }
-        const { power, brightness, data } = user.devices[device_index].status;
-
-        return res.status(200).json({ power, brightness, data });
+        const device_status = user.devices[0].status;
+        return res.status(200).json(device_status);
     } catch (err) {
         console.log(err);
         return res.status(500).json({ message: err });
@@ -269,7 +263,8 @@ router.get('/statuses', async (req, res) => {
             return res.status(code).json({ message });
         }
         const user_id = acc_check.message;
-        const user = await dm_user.findById({ _id: user_id });
+        const query = dm_user.findById({ _id: user_id }).select("first_name devices");
+        const user = await query.exec();
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -278,7 +273,7 @@ router.get('/statuses', async (req, res) => {
             return res.status(404).json({ message: 'No registered found' });
         }
         const initials = user.first_name.substring(0, 1);
-        const devices = devices_db.map(device => { return { name: device.name, locked: device.locked, power: device.status.power, brightness: device.status.brightness, data: device.status.data } });
+        const devices = devices_db.map(device => { return { name: device.name, locked: device.locked, ...device.status } });
         res.status(200).json({ initials, devices });
     } catch (err) {
         console.log(err);

@@ -127,7 +127,7 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ message: `Invalid Email or password` }); //Incorrect password rules need to check DB
         }
         const email = req_body.email;
-        const user = await dm_user.findOne({ email });
+        const user = await dm_user.findOne({ email }, "password verified");
 
         if (!user) {
             return res.status(404).json({ message: `user with Email : ${email} does not exist` });
