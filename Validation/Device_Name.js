@@ -4,7 +4,11 @@ const sch_device_name = new pv();
 
 sch_device_name.is().min(8)
 .is().max(20)
-.has().not().spaces();
+.has().not().spaces()
+.is().usingPlugin((value)=>{
+    const ssid_regex = /^[^!#;+\]\/"\t][^+\]"\t]*$/;
+    return ssid_regex.test(value);
+});
 
 const validate = (name) => {
     const name_check = sch_device_name.validate(name, {list: true});
