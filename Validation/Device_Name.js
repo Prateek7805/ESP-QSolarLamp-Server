@@ -19,7 +19,7 @@ const validate = (name) => {
     if(initial_check.some(item=>name_check.includes(item))){
         return {code : 400, message: "Please enter a device name between 8 and 20 characters"};
     }
-    return {code: 400, message: "Please enter a device name without spaces"};
+    return {code: 400, message: "Please enter a device without spaces and does not begin in a special character"};
 }
 module.exports = {
     sch_device_name,
