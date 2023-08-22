@@ -131,7 +131,12 @@ router.delete('/device', async (req, res) => {
         user.devices = user.devices.filter(device => device.name !== name);
         await user.save();
         //clear session if exists
-        sse_list = sse_list.filter(device=>device.device_id !== device_id);
+        const session_index = sse_list.findIndex(device=>device.device_id === device_id);
+
+        if(session_index !== -1){
+            sse_list.splice(session_index, 1);
+        }
+        
         const license_key_db = await dm_license_key.findOne({ device_id });
 
         if (!license_key_db) {
@@ -224,8 +229,12 @@ router.patch('/status', async (req, res) => {
         console.log(`device_id: ${device_id}`);
 
         const sse_device = sse_list.find(device=>device.device_id === device_id);
+        /*console.log(sse_list);
+        console.log(`sse_device_id type: ${typeof sse_list[0].device_id}`);
+        console.log(`device_id type: ${typeof device_id}`);
+
         console.log(`sse_Device: ${sse_device}`);
-        console.log(`Device status: ${JSON.stringify(user.devices[device_index].status)}`);
+        console.log(`Device status: ${JSON.stringify(user.devices[device_index].status)}`);*/
         if(sse_device){
             sse_device.res.write(`data: ${JSON.stringify(user.devices[device_index].status)}\n\n`);
         }

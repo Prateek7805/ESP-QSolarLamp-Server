@@ -14,7 +14,7 @@ const light_auth = require('../Authentication/Light_Auth');
 
 router.use(body_parser.json());
 
-let sse_list = []; //array to maintain active session with light-clients
+const sse_list = []; //array to maintain active session with light-clients
 router.post('/login-sse', async (req, res)=>{
     try {
         const req_body = req.body;
@@ -71,7 +71,10 @@ router.post('/login-sse', async (req, res)=>{
         const sse_event_data = `data: ${JSON.stringify(device_status)}\n\n`;
 
         res.write(sse_event_data);
-        sse_list = sse_list.filter(device=>device.device_id !== device_id);
+        const sse_old_client_index = sse_list.findIndex(device=>device.device_id === device_id)
+        if(sse_old_client_index !== -1){
+            sse_list.splice(sse_old_client_index, 1);
+        }
         const start_timestamp = Date.now();
         const new_light = {
             device_id,
