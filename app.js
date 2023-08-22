@@ -29,7 +29,7 @@ app.use(cors(cors_options));
 
 app.use('/', user_router);
 app.use('/device', device_router);
-app.use('/light', light_router.router);
+app.use('/light', light_router);
 
 app.listen(PORT, ()=>{
     console.log(`Server started on ${PORT}`);

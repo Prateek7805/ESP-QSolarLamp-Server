@@ -11,7 +11,6 @@ const device_name_valid = require('../Validation/Device_Name');
 const pass_valid = require('../Validation/Password');
 const license_key_valid = require('../Validation/License_key');
 const dm_license_key = require('../DBO/License_Key_Sch');
-const {sse_list} = require('./Light_Route');
 router.use(body_parser.json());
 router.use(cookie_parser());
 
@@ -131,17 +130,6 @@ router.delete('/device', async (req, res) => {
         user.devices = user.devices.filter(device => device.name !== name);
         await user.save();
         //clear session if exists
-        const old_device_client = sse_list.find(device=>device.device_id === device_id);
-        
-        if(old_device_client){
-            old_device_client.res.write(': Close connection\nretry: 0\n\n');
-            old_device_client.res.end();
-        }
-        const sse_old_client_index = sse_list.findIndex(device=>device.device_id === device_id)
-        if(sse_old_client_index !== -1){
-            sse_list.splice(sse_old_client_index, 1);
-        }
-        
         const license_key_db = await dm_license_key.findOne({ device_id });
 
         if (!license_key_db) {
@@ -229,20 +217,7 @@ router.patch('/status', async (req, res) => {
             user.devices[device_index].status.data = data;
 
         await user.save();
-        const device_id = user.devices[device_index]._id.toString();
-        console.log(sse_list);
-        console.log(`device_id: ${device_id}`);
-
-        const sse_device = sse_list.find(device=>device.device_id === device_id);
-        /*console.log(sse_list);
-        console.log(`sse_device_id type: ${typeof sse_list[0].device_id}`);
-        console.log(`device_id type: ${typeof device_id}`);
-
-        console.log(`sse_Device: ${sse_device}`);
-        console.log(`Device status: ${JSON.stringify(user.devices[device_index].status)}`);*/
-        if(sse_device){
-            sse_device.res.write(`data: ${JSON.stringify(user.devices[device_index].status)}\n\n`);
-        }
+        
         return res.status(200).json({ message: 'Device status updated' });
     } catch (err) {
         console.log(err);
