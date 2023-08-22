@@ -37,7 +37,7 @@ router.post('/login-sse', async (req, res)=>{
             return res.status(400).json({ message: "Invalid password" });
         }
         const license_key_db = lk_check.message;
-        const { device_id } = license_key_db;
+        const device_id = license_key_db.device_id.toString();
         const user = await dm_user.findOne({ 'devices._id': device_id }, { '_id' : 0, "devices.$": 1 });
 
         if (!user) {

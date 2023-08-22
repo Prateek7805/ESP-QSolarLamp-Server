@@ -126,11 +126,12 @@ router.delete('/device', async (req, res) => {
         if (device_index === -1) {
             return res.status(404).json({ message: `Device with name : ${name} does not exist` });
         }
-        const device_id = user.devices[device_index]._id;
+        const device_id = user.devices[device_index]._id.toString();
 
         user.devices = user.devices.filter(device => device.name !== name);
         await user.save();
-
+        //clear session if exists
+        sse_list = sse_list.filter(device=>device.device_id !== device_id);
         const license_key_db = await dm_license_key.findOne({ device_id });
 
         if (!license_key_db) {
