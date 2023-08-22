@@ -11,7 +11,7 @@ const device_name_valid = require('../Validation/Device_Name');
 const pass_valid = require('../Validation/Password');
 const license_key_valid = require('../Validation/License_key');
 const dm_license_key = require('../DBO/License_Key_Sch');
-
+const {sse_list} = require('./Light_Route');
 router.use(body_parser.json());
 router.use(cookie_parser());
 
@@ -218,8 +218,19 @@ router.patch('/status', async (req, res) => {
             user.devices[device_index].status.data = data;
 
         await user.save();
+        const device_id = user.devices[device_index]._id.toString();
+        console.log(sse_list);
+        console.log(`device_id: ${device_id}`);
+
+        const sse_device = sse_list.find(device=>device.device_id === device_id);
+        console.log(`sse_Device: ${sse_device}`);
+        console.log(`Device status: ${JSON.stringify(user.devices[device_index].status)}`);
+        if(sse_device){
+            sse_device.res.write(`data: ${JSON.stringify(user.devices[device_index].status)}\n\n`);
+        }
         return res.status(200).json({ message: 'Device status updated' });
     } catch (err) {
+        console.log(err);
         return res.status(500).json({ message: err });
     }
 });
@@ -234,7 +245,7 @@ router.get('/status', async (req, res) => {
         const user_id = acc_check.message;
         const has_name = req.query.hasOwnProperty('name');
         if (!has_name) {
-            return res.status(400).json({ message: "Paarmeter : 'name' is required" });
+            return res.status(400).json({ message: "Parameter : 'name' is required" });
         }
         const name = req.query.name;
         const device_name_check = device_name_valid.sch_device_name.validate(name);
