@@ -14,7 +14,7 @@ const light_auth = require('../Authentication/Light_Auth');
 
 router.use(body_parser.json());
 
-const sse_list = []; //array to maintain active session with light-clients
+let sse_list = []; //array to maintain active session with light-clients
 router.post('/login-sse', async (req, res)=>{
     try {
         const req_body = req.body;
