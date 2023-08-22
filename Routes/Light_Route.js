@@ -71,10 +71,18 @@ router.post('/login-sse', async (req, res)=>{
         const sse_event_data = `data: ${JSON.stringify(device_status)}\n\n`;
 
         res.write(sse_event_data);
+
+        const old_device_client = sse_list.find(device=>device.device_id === device_id);
+        
+        if(old_device_client){
+            old_device_client.res.write(': Close connection\nretry: 0\n\n');
+            old_device_client.res.end();
+        }
         const sse_old_client_index = sse_list.findIndex(device=>device.device_id === device_id)
         if(sse_old_client_index !== -1){
             sse_list.splice(sse_old_client_index, 1);
         }
+
         const start_timestamp = Date.now();
         const new_light = {
             device_id,

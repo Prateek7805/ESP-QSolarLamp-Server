@@ -131,10 +131,15 @@ router.delete('/device', async (req, res) => {
         user.devices = user.devices.filter(device => device.name !== name);
         await user.save();
         //clear session if exists
-        const session_index = sse_list.findIndex(device=>device.device_id === device_id);
-
-        if(session_index !== -1){
-            sse_list.splice(session_index, 1);
+        const old_device_client = sse_list.find(device=>device.device_id === device_id);
+        
+        if(old_device_client){
+            old_device_client.res.write(': Close connection\nretry: 0\n\n');
+            old_device_client.res.end();
+        }
+        const sse_old_client_index = sse_list.findIndex(device=>device.device_id === device_id)
+        if(sse_old_client_index !== -1){
+            sse_list.splice(sse_old_client_index, 1);
         }
         
         const license_key_db = await dm_license_key.findOne({ device_id });
