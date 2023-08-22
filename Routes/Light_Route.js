@@ -71,6 +71,7 @@ router.post('/login-sse', async (req, res)=>{
         const sse_event_data = `data: ${JSON.stringify(device_status)}\n\n`;
 
         res.write(sse_event_data);
+        sse_list = sse_list.filter(device=>device.device_id !== device_id);
         const start_timestamp = Date.now();
         const new_light = {
             device_id,
