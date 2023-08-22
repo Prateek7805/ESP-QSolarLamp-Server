@@ -89,11 +89,11 @@ router.post('/login-sse', async (req, res)=>{
         return res.status(500).json({message: err});
     }
 });
-/*
+
 router.get('/device_sse_active_session', (req, res)=>{
     return res.status(200).json(sse_list.map(item=>item.device_id));
 });
-*/
+
 router.post('/login', async (req, res) => {
     try {
         const req_body = req.body;
