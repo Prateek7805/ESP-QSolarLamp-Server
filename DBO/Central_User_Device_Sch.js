@@ -36,6 +36,7 @@ const sch_user = mongoose.Schema({
                 type: Number,
                 default: 30
             },
+            color : String,
             data : [String]
         },
         creation_date: {

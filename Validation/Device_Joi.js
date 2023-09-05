@@ -12,6 +12,7 @@ const unregister = joi.object({
 const update = joi.object({
     power: joi.boolean().optional(),
     brightness: joi.number().optional(),
+    color: joi.string().optional(),
     data: joi.array().items(joi.string()).optional()
 });
 

@@ -14,6 +14,12 @@ const dm_license_key = require('../DBO/License_Key_Sch');
 router.use(body_parser.json());
 router.use(cookie_parser());
 
+const DEFAULT_STATUS = {
+    power: false,
+    brightness: 30,
+    color: '#000000',
+    data: []
+}
 router.post('/register', async (req, res) => {
     try {
         const access_token = req.header('x-auth-token');
@@ -67,11 +73,7 @@ router.post('/register', async (req, res) => {
             name: name,
             password: hashed_password,
             locked: false,
-            status: {
-                power: false,
-                brightness: 30,
-                data: []
-            }
+            status: DEFAULT_STATUS
         };
         user.devices.push(new_device);
         await user.save();
@@ -191,7 +193,7 @@ router.patch('/status', async (req, res) => {
         if (Object.keys(req_body).length === 0) {
             return res.status(400).json({ message: "Request body empty" });
         }
-        const { power, brightness, data } = req_body;
+        const { power, brightness, color, data } = req_body;
         const device_name_check = device_name_valid.sch_device_name.validate(name);
 
         if (!device_name_check) {
@@ -213,6 +215,8 @@ router.patch('/status', async (req, res) => {
             user.devices[device_index].status.power = power;
         if (brightness !== undefined)
             user.devices[device_index].status.brightness = brightness;
+        if (color !== undefined)
+            user.devices[device_index].status.color = color;
         if (data !== undefined && data.length !== 0)
             user.devices[device_index].status.data = data;
 
