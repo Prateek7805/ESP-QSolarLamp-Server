@@ -17,7 +17,7 @@ router.use(cookie_parser());
 const DEFAULT_STATUS = {
     power: false,
     brightness: 30,
-    color: '#000000',
+    color: '#2E94B9',
     data: []
 }
 router.post('/register', async (req, res) => {
