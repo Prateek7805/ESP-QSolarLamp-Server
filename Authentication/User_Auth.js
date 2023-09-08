@@ -62,7 +62,7 @@ const verify_refresh_token = async (token) => {
 
         const token_exists = db_user.refresh_tokens.some(_token => _token.token === sign);
         if (!token_exists) {
-            return { code: 403, message: "invalid jwt" };
+            return { code: 401, message: "invalid refresh jwt" };
         }
 
         //refresh token verified
@@ -75,7 +75,7 @@ const verify_refresh_token = async (token) => {
 
         return { code: 200, message: { user_id, rolled_refresh_token } };
     } catch (err) {
-        return { code: 403, message: "invalid jwt" };
+        return { code: 401, message: "invalid refresh jwt" };
     }
 }
 
