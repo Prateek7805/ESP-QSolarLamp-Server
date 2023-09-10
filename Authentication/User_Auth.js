@@ -123,6 +123,21 @@ const remove_ref_token_db = async (user_id, token) => {
     }
 }
 
+const clear_ref_tokens_db = async (user_id)=>{
+    try{
+        const updated_user = await dm_user.updateOne({_id: user_id}, {$set : {refresh_tokens : []}});
+        if(!updated_user || updated_user.matchedCount === 0){
+            return {code: 404, message: "User not found"};
+        }
+        if(updated_user.modifiedCount === 0){
+            return {code: 500, message: "Unable to clear the refresh token array"};
+        }
+        return {code: 200, message: "Refresh token array cleared"};
+    }catch(err){
+        console.log(err);
+        return { code: 500, message: "Couldn't clear the refresh token array" };
+    }
+}
 
 module.exports = {
     get_access_token,
@@ -130,5 +145,6 @@ module.exports = {
     verify_access_token,
     verify_refresh_token,
     save_ref_token_db,
-    remove_ref_token_db
+    remove_ref_token_db,
+    clear_ref_tokens_db
 }

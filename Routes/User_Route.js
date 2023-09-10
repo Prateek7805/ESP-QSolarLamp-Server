@@ -174,8 +174,24 @@ router.get('/logout', async (req, res) => {
             const { code, message } = acc_check;
             return res.status(code).json(message);
         }
+        const param_check = req.query.hasOwnProperty('all');
+        let logout_all = false;
+        if(param_check){
+            logout_all = req.query.all === 'true';
+        }
 
         const user_id = acc_check.message;
+        
+        if (logout_all){
+            const ref_check = await user_auth.clear_ref_tokens_db(user_id);
+            
+            if(ref_check.code !== 200){
+                const {code, message} = ref_check;
+                return res.status(code).json({message});
+            }
+            res.clearCookie('refresh_token');
+            return res.status(200).json({message: "logged out from all devices"});
+        }
         const refresh_token = req.cookies?.refresh_token;
         const ref_check = await user_auth.remove_ref_token_db(user_id, refresh_token);
         res.clearCookie('refresh_token');
